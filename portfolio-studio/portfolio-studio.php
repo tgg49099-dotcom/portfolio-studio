@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Portfolio Studio
  * Plugin URI:        https://github.com/tgg49099-dotcom/portfolio-studio
- * Description:       Editorial portfolio for WordPress: a `portfolio` content type, category and tag taxonomies, and project details (client, year, role, technologies). Coexists with any other plugin that already registers the same content type.
+ * Description:       Editorial portfolio for WordPress: a portfolio content type, categories and tags, and per-item details (client, year, role, technologies).
  * Version:           0.1.0
  * Requires at least: 6.5
  * Requires PHP:      7.4
@@ -17,6 +17,10 @@
  *
  * `Plugin URI` points to the public source repository of the plugin: the code that
  * ships in the WordPress.org directory is the code of that repository, nothing else.
+ *
+ * The plugin coexists with any other plugin that already registers the same content
+ * type: it reuses the existing content type and taxonomies instead of replacing
+ * them, so the items, categories and tags already published keep working.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
