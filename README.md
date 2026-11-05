@@ -56,11 +56,53 @@ bash tests/run-counter-proof.sh /path/to/wordpress
 ## Building the submission archive
 
 The archive uploaded to WordPress.org is not committed here: it is built from the
-plugin folder, with frozen timestamps, so that the same source always produces the
-same archive.
+plugin folder, with **frozen timestamps**, so that the same source always produces
+the same archive (same md5). Without the `touch`, the md5 changes on every build
+and proves nothing.
 
 ```bash
-cd portfolio-studio && zip -X -r ../portfolio-studio.zip portfolio-studio
+# 1. copy the plugin to a staging directory (one top-level folder only)
+mkdir -p /tmp/build && rm -rf /tmp/build/portfolio-studio
+cp -a portfolio-studio /tmp/build/portfolio-studio
+
+# 2. freeze the timestamps
+find /tmp/build -exec touch -h -t 202611050000 {} +
+
+# 3. build the archive
+( cd /tmp/build && zip -q -X -r /tmp/portfolio-studio.zip portfolio-studio )
+
+# 4. check: the same source gives the same md5, build it twice
+md5sum /tmp/portfolio-studio.zip
+```
+
+## The code
+
+The plugin is four files and a bootstrap; there is no third-party library, no
+build step and no generated code. The four project details, with their declared
+type and their sanitiser, are declared in one place:
+
+```php
+// includes/class-portfolio-studio-meta.php
+const KEY_CLIENT       = 'portfolio_studio_client';       // string
+const KEY_YEAR         = 'portfolio_studio_year';         // integer
+const KEY_ROLE         = 'portfolio_studio_role';         // string
+const KEY_TECHNOLOGIES = 'portfolio_studio_technologies'; // array of strings
+
+public static function sanitize_client( $value ) {
+    if ( ! is_scalar( $value ) ) {
+        return '';
+    }
+
+    return sanitize_text_field( (string) $value );
+}
+```
+
+Every write path goes through those sanitisers, and the counter-proof in
+`tests/` proves it: the same suite fails on a variant whose sanitiser has been
+removed.
+
+```bash
+bash tests/run-counter-proof.sh /path/to/wordpress
 ```
 
 ## License
