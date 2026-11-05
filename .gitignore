@@ -1,0 +1,25 @@
+# Build artefacts
+*.zip
+
+# Local proof logs and fixtures produced by the test runs
+preuves/
+proofs/
+fixtures/
+
+# WordPress checkouts used as a test sandbox
+wordpress/
+wp-content/
+
+# Editor and operating system noise
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Secrets — this repository is public
+.env
+.env.*
+*.pem
+*.key
