@@ -5,6 +5,7 @@
 preuves/
 proofs/
 fixtures/
+tests/build/
 
 # WordPress checkouts used as a test sandbox
 wordpress/

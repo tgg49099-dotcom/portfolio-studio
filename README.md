@@ -66,11 +66,12 @@ cd portfolio-studio && zip -X -r ../portfolio-studio.zip portfolio-studio
 ## License
 
 - The plugin (`portfolio-studio/`) is licensed under **GPL-2.0-or-later** — the
-  WordPress.org plugin directory only accepts GPL-compatible plugins.
+  WordPress.org plugin directory only accepts GPL-compatible plugins. Its full text
+  is in [`portfolio-studio/LICENSE`](portfolio-studio/LICENSE).
 - Everything else in this repository (tests, tooling, documentation) is licensed
-  under the **MIT** license.
+  under the **MIT** license: [`LICENSE`](LICENSE).
 
-See [`LICENSE`](LICENSE) for the scope of each license.
+[`NOTICE`](NOTICE) states which license covers which folder.
 
 ## Author
 

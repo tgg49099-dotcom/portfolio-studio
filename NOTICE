@@ -1,0 +1,22 @@
+NOTICE — scope of the licenses in this repository
+==================================================
+
+This repository holds two things, under two different licenses.
+
+1. The WordPress plugin, in the folder `portfolio-studio/`.
+   License: GNU General Public License, version 2 or later (GPL-2.0-or-later).
+   Full text: `portfolio-studio/LICENSE`.
+   The plugin header (`portfolio-studio/portfolio-studio.php`) and the readme
+   (`portfolio-studio/readme.txt`) declare the same license.
+   Reason: the WordPress.org plugin directory only accepts plugins under a
+   GPL-compatible license, and the plugin published there is this code.
+
+2. Everything else in this repository — the test harness in `tests/`, the
+   documentation and the repository tooling.
+   License: MIT.
+   Full text: `LICENSE`.
+
+The MIT license at the root of the repository therefore does not apply to the
+plugin folder. The plugin folder carries its own license file, and that file
+covers it. Anyone reusing the code must respect the license of the folder the
+code comes from.

@@ -2,19 +2,6 @@ MIT License
 
 Copyright (c) 2026 Tgg Labs
 
-Scope of this license
----------------------
-
-This license covers the contents of this repository EXCEPT the WordPress plugin
-stored in the `portfolio-studio/` folder, which is distributed under the GNU
-General Public License version 2 or later. See `portfolio-studio/LICENSE` for the
-license of the plugin.
-
-The plugin is published in the WordPress.org plugin directory, which requires a
-GPL-compatible license for every plugin it hosts. The two licenses coexist: the
-tooling, the tests and the documentation of this repository are MIT, the plugin
-itself is GPL-2.0-or-later.
-
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
