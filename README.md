@@ -30,9 +30,10 @@ portfolio-studio/          The plugin, exactly as it is shipped.
   includes/                Content types, metadata, editor panel, lifecycle.
   readme.txt               The readme of the WordPress.org listing.
   uninstall.php            Cleanup, run when the plugin is deleted.
+  assets/                  The screenshots of the listing (screenshot-1.png, screenshot-2.png).
   LICENSE                  GPL-2.0-or-later (required by WordPress.org).
 tests/                     The test harness (see tests/README.md).
-LICENSE                    MIT, for everything outside portfolio-studio/.
+LICENSE                    GPL-2.0-or-later — the license of the whole repository.
 ```
 
 The `portfolio-studio/languages/` folder is intentionally empty: it is where
@@ -107,13 +108,16 @@ bash tests/run-counter-proof.sh /path/to/wordpress
 
 ## License
 
-- The plugin (`portfolio-studio/`) is licensed under **GPL-2.0-or-later** — the
-  WordPress.org plugin directory only accepts GPL-compatible plugins. Its full text
-  is in [`portfolio-studio/LICENSE`](portfolio-studio/LICENSE).
-- Everything else in this repository (tests, tooling, documentation) is licensed
-  under the **MIT** license: [`LICENSE`](LICENSE).
+This repository — the plugin (`portfolio-studio/`), the test harness (`tests/`), the
+documentation and the tooling — is licensed under the **GNU General Public License,
+version 2 or later (GPL-2.0-or-later)**.
 
-[`NOTICE`](NOTICE) states which license covers which folder.
+The WordPress.org plugin directory only accepts GPL-compatible plugins, and the plugin
+published there is the code of this repository, so the repository carries the same
+license. The full text is in [`LICENSE`](LICENSE); the plugin folder also carries its
+own copy in [`portfolio-studio/LICENSE`](portfolio-studio/LICENSE).
+
+[`NOTICE`](NOTICE) repeats that statement.
 
 ## Author
 

@@ -1,22 +1,20 @@
-NOTICE — scope of the licenses in this repository
+NOTICE — license of this repository
 ==================================================
 
-This repository holds two things, under two different licenses.
+This repository is licensed under the **GNU General Public License, version 2 or later
+(GPL-2.0-or-later)**. Full text: `LICENSE` (root of the repository).
 
-1. The WordPress plugin, in the folder `portfolio-studio/`.
-   License: GNU General Public License, version 2 or later (GPL-2.0-or-later).
-   Full text: `portfolio-studio/LICENSE`.
-   The plugin header (`portfolio-studio/portfolio-studio.php`) and the readme
-   (`portfolio-studio/readme.txt`) declare the same license.
-   Reason: the WordPress.org plugin directory only accepts plugins under a
-   GPL-compatible license, and the plugin published there is this code.
+The WordPress plugin in the folder `portfolio-studio/` carries the same license: the full
+text is in `portfolio-studio/LICENSE`, and the plugin header
+(`portfolio-studio/portfolio-studio.php`) and the readme (`portfolio-studio/readme.txt`)
+declare `License: GPL-2.0-or-later`.
 
-2. Everything else in this repository — the test harness in `tests/`, the
-   documentation and the repository tooling.
-   License: MIT.
-   Full text: `LICENSE`.
+Reason: the WordPress.org plugin directory only accepts plugins under a GPL-compatible
+license, and the plugin published there is this code. The whole repository is therefore
+under the same license as the plugin it publishes — there is no second license to
+reconcile, and no ambiguity about what applies to which file.
 
-The MIT license at the root of the repository therefore does not apply to the
-plugin folder. The plugin folder carries its own license file, and that file
-covers it. Anyone reusing the code must respect the license of the folder the
-code comes from.
+The test harness in `tests/`, the documentation and the repository tooling are part of
+the same work and are therefore covered by the same license.
+
+Copyright (C) 2026 Tgg Labs.
