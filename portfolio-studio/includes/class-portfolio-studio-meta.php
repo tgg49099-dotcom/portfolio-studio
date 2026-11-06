@@ -13,8 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Project details stored in post meta.
  *
  * Every key is prefixed and every value has a declared type, so the data survives a
- * round trip through the REST API, a CSV export and the 1-click import (J3) without
- * ever changing shape.
+ * round trip through the REST API and a CSV export without ever changing shape.
  *
  * | Key                             | Type    | Meaning                          |
  * |---------------------------------|---------|----------------------------------|
@@ -148,7 +147,17 @@ class Portfolio_Studio_Meta {
 	}
 
 	/**
-	 * Authorisation callback: only users who can edit the item may read or write its details.
+	 * Authorisation callback: only users who can edit the item may WRITE its details.
+	 *
+	 * The callback guards the writing only. WordPress calls it for the `edit_post_meta`,
+	 * `add_post_meta` and `delete_post_meta` capability checks; it never hides a value
+	 * by itself. What the REST API publishes depends on the content type, not on this
+	 * callback: a registered meta key is exposed there only if the content type declares
+	 * the `custom-fields` support. The `portfolio` content type does not declare it, so
+	 * WordPress does not publish the `meta` object of these items at all — the four
+	 * details are not readable through the REST API today. Were that support added
+	 * later, they would become readable by anyone who can read a published item.
+	 * Never store anything confidential in them.
 	 *
 	 * @param bool   $allowed    Whether the user can add the meta. Unused.
 	 * @param string $meta_key   Meta key. Unused.

@@ -1,6 +1,6 @@
 === Portfolio Studio ===
 Contributors: tgg49099
-Tags: portfolio, projects, clients, custom post type, portfolio grid
+Tags: portfolio, projects, clients, custom post type
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
@@ -16,10 +16,13 @@ Portfolio Studio turns WordPress into an editorial portfolio: a `portfolio` cont
 a category and a tag taxonomy, and four project details for every item — **client**,
 **year**, **role** and **technologies**.
 
-Each detail has a declared type, so the same value is stored and displayed the same way
+Each detail has a declared type, so the same value is stored and shown in the editor the same way
 for every item, and the data stays yours: it lives in your own database, in your own posts.
 
 == Works alongside the portfolio plugin you already have ==
+
+**Replace Portfolio Post Type: deactivate it, activate Portfolio Studio — your items,
+categories and tags stay.**
 
 Portfolio Studio does not create a second portfolio: it uses the `portfolio` content type
 that already exists on your site, so every item you published stays exactly where it is —
@@ -49,7 +52,15 @@ project details become available on them.
 = Which details can I record? =
 
 Client, year, role and technologies. Each detail has a declared type, so the same value is
-stored and displayed the same way for every item.
+stored and shown in the editor the same way for every item.
+
+= Are the project details private? =
+
+The WordPress REST API does not publish them: the portfolio content type does not
+declare the custom fields support, so the API does not expose the details at all.
+They live in your own database and are shown in the editor, and only the people who
+can edit the item can change them. Do not put anything confidential in them anyway:
+that is a property of the content type, not a promise of the plugin.
 
 = What happens when I deactivate the plugin? =
 

@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Classic editor panel holding the four editorial fields.
  *
  * The fields are stored in post meta through `register_post_meta()`, so the same data is
- * available to the REST API, to exports and to the 1-click import without a second format.
+ * available to the REST API and to exports without a second format.
  *
  * @package Portfolio_Studio
  */
