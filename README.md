@@ -32,9 +32,16 @@ portfolio-studio/          The plugin, exactly as it is shipped.
   uninstall.php            Cleanup, run when the plugin is deleted.
   assets/                  The screenshots of the listing (screenshot-1.png, screenshot-2.png).
   LICENSE                  GPL-2.0-or-later (required by WordPress.org).
+assets/                    The images of the WordPress.org listing page.
 tests/                     The test harness (see tests/README.md).
 LICENSE                    GPL-2.0-or-later — the license of the whole repository.
 ```
+
+The two screenshots are in **both** places on purpose. The WordPress.org plugin directory reads
+the images of a listing from an `assets/` directory **at the root of the plugin's reference
+repository, on the same level as `trunk/`** — not from inside the plugin folder. So `assets/`
+at the root of this repository is the location the directory reads; `portfolio-studio/assets/`
+is where they travel inside the archive that is uploaded. The two copies are byte-identical.
 
 The `portfolio-studio/languages/` folder is intentionally empty: it is where
 WordPress.org's translation tooling puts the translations. Empty folders are not
