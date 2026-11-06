@@ -62,6 +62,31 @@ It prints:
 - the result of the suite against the real plugin (it must pass);
 - the result of the same suite against the unsanitised variant (it must fail).
 
+## The proof of the uninstall routine
+
+`uninstall.php` runs when the plugin is deleted from the Plugins screen. It must
+remove what the plugin owns and **nothing the user wrote**: not the `portfolio`
+items, and not their metadata unless the site owner asks for it explicitly.
+
+```bash
+bash tests/run-uninstall-proof.sh /path/to/wordpress
+```
+
+`uninstall-keep-proof.php` creates a `portfolio` item with the four metadata keys
+of the plugin and one key of the site, then runs the uninstall twice — without and
+with the explicit opt-in — and asserts that:
+
+- the item of the user still exists, is not trashed, and its title and content are intact;
+- the four metadata keys of the plugin are **kept** when the cleanup is not requested;
+- they are **removed** when the cleanup is requested (the
+  `portfolio_studio_uninstall_remove_post_meta` filter);
+- the metadata of the site is never touched;
+- the routine really ran (its own option is gone).
+
+The same test is then run against a witness that deletes the `portfolio` items: the
+test **must** fail. The witness is written to a temporary folder at every run — a
+script that deletes the items of a site has no business in a public repository.
+
 ## Writing a test
 
 The framework is `framework.php`: a tiny TAP-like runner with `ok()`, `same()`,
