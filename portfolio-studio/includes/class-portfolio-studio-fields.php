@@ -137,16 +137,32 @@ class Portfolio_Studio_Fields {
 			return;
 		}
 
+		/*
+		 * Every submitted value is cleaned twice: first by a WordPress sanitiser, so
+		 * that the static analyser can see the cleaning, then by the sanitiser
+		 * registered for the meta key, which keeps the declared type of the value.
+		 * Both steps store exactly the same values as the single one they replace.
+		 */
 		$client = isset( $_POST[ Portfolio_Studio_Meta::KEY_CLIENT ] )
-			? Portfolio_Studio_Meta::sanitize_client( wp_unslash( $_POST[ Portfolio_Studio_Meta::KEY_CLIENT ] ) )
+			? Portfolio_Studio_Meta::sanitize_client( sanitize_text_field( wp_unslash( $_POST[ Portfolio_Studio_Meta::KEY_CLIENT ] ) ) )
 			: '';
 		$year = isset( $_POST[ Portfolio_Studio_Meta::KEY_YEAR ] )
-			? Portfolio_Studio_Meta::sanitize_year( wp_unslash( $_POST[ Portfolio_Studio_Meta::KEY_YEAR ] ) )
+			? Portfolio_Studio_Meta::sanitize_year(
+				is_scalar( $_POST[ Portfolio_Studio_Meta::KEY_YEAR ] )
+					? intval( wp_unslash( $_POST[ Portfolio_Studio_Meta::KEY_YEAR ] ) )
+					: 0
+			)
 			: 0;
 		$role = isset( $_POST[ Portfolio_Studio_Meta::KEY_ROLE ] )
-			? Portfolio_Studio_Meta::sanitize_role( wp_unslash( $_POST[ Portfolio_Studio_Meta::KEY_ROLE ] ) )
+			? Portfolio_Studio_Meta::sanitize_role( sanitize_text_field( wp_unslash( $_POST[ Portfolio_Studio_Meta::KEY_ROLE ] ) ) )
 			: '';
+		/*
+		 * The technologies are cleaned label by label, once the list has been split: a
+		 * single sanitiser call would clean the whole list at once and would change
+		 * what is stored, because a label would inherit the cleaning of the next one.
+		 */
 		$technologies = isset( $_POST[ Portfolio_Studio_Meta::KEY_TECHNOLOGIES ] )
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- cleaned by Portfolio_Studio_Meta::sanitize_technologies(), label by label.
 			? Portfolio_Studio_Meta::sanitize_technologies( wp_unslash( $_POST[ Portfolio_Studio_Meta::KEY_TECHNOLOGIES ] ) )
 			: array();
 
