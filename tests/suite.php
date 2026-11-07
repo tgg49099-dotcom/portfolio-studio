@@ -276,9 +276,22 @@ if ( 'activated' === $ps_phase ) {
 	$ps_option = get_option( 'portfolio_studio_state' );
 	PS_Test_Runner::ok( is_array( $ps_option ), 'the plugin state option exists' );
 	PS_Test_Runner::same(
-		'0.1.0',
+		PORTFOLIO_STUDIO_VERSION,
 		is_array( $ps_option ) ? $ps_option['version'] : '',
 		'the state option records the plugin version'
+	);
+
+	// The version of the header of the plugin is the version of the constant: the
+	// directory reads the header, the plugin writes the constant. A version that
+	// drifts between the two is a version the directory does not know.
+	$ps_header = get_file_data(
+		WP_PLUGIN_DIR . '/portfolio-studio/portfolio-studio.php',
+		array( 'Version' => 'Version' )
+	);
+	PS_Test_Runner::same(
+		$ps_header['Version'],
+		PORTFOLIO_STUDIO_VERSION,
+		'the version of the plugin header is the version of the constant'
 	);
 
 	$ps_default = get_term_by( 'slug', 'uncategorized', 'portfolio_category' );

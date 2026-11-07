@@ -4,7 +4,7 @@ Tags: portfolio, projects, clients, custom post type
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 0.1.0
+Stable tag: 0.1.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,12 @@ The details you typed on your portfolio items stay in place.
 2. The portfolio categories screen.
 
 == Changelog ==
+
+= 0.1.1 =
+* 5 correctifs de parite avec Portfolio Post Type
+* Parity fixes: the category and tag URL slugs, the permalink prefix, the admin menu
+  position, the admin labels and the multisite activation now match the original
+  Portfolio Post Type plugin exactly.
 
 = 0.1.0 =
 * First release: portfolio content type, portfolio categories and tags, and the client,

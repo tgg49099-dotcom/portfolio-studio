@@ -14,6 +14,7 @@
 #
 # Phases:
 #   suite.php       registration, metadata round trip, lifecycle, coexistence
+#   suite-parite.php  the five parity fixes, measured against the original plugin
 #   suite-secu.php  counter-proof of the input sanitisation
 #
 # Exit code 0 when every assertion passes.
@@ -112,7 +113,16 @@ else
 	say "--- coexistence : SKIPPED (no portfolio-post-type plugin installed) ---"
 fi
 
-# --- 2. the counter-proof -----------------------------------------------------
+# --- 2. the parity suite ------------------------------------------------------
+# The parity suite reads the objects WordPress actually registered, so the
+# plugin must be the only one registering the `portfolio` content type.
+say ""
+say "--- suite-parite.php : the five parity fixes ---"
+wp_cmd plugin deactivate portfolio-post-type > /dev/null 2>&1
+wp_cmd plugin activate portfolio-studio > /dev/null 2>&1
+run_phase parite suite-parite.php
+
+# --- 3. the counter-proof -----------------------------------------------------
 say ""
 say "--- suite-secu.php : hostile input, from the request to the page ---"
 wp_cmd plugin activate portfolio-studio > /dev/null 2>&1

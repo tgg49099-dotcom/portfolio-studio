@@ -282,13 +282,14 @@ class Portfolio_Studio_Content_Types {
 			'name_admin_bar'        => _x( 'Portfolio Item', 'add new on admin bar', 'portfolio-studio' ),
 			'add_new'               => __( 'Add New Item', 'portfolio-studio' ),
 			'add_new_item'          => __( 'Add New Portfolio Item', 'portfolio-studio' ),
-			'new_item'              => __( 'New Portfolio Item', 'portfolio-studio' ),
+			'new_item'              => __( 'Add New Portfolio Item', 'portfolio-studio' ),
 			'edit_item'             => __( 'Edit Portfolio Item', 'portfolio-studio' ),
-			'view_item'             => __( 'View Portfolio Item', 'portfolio-studio' ),
+			'view_item'             => __( 'View Item', 'portfolio-studio' ),
 			'all_items'             => __( 'All Portfolio Items', 'portfolio-studio' ),
-			'search_items'          => __( 'Search Portfolio Items', 'portfolio-studio' ),
-			'not_found'             => __( 'No portfolio items found.', 'portfolio-studio' ),
-			'not_found_in_trash'    => __( 'No portfolio items found in Trash.', 'portfolio-studio' ),
+			'search_items'          => __( 'Search Portfolio', 'portfolio-studio' ),
+			'parent_item_colon'     => __( 'Parent Portfolio Item:', 'portfolio-studio' ),
+			'not_found'             => __( 'No portfolio items found', 'portfolio-studio' ),
+			'not_found_in_trash'    => __( 'No portfolio items found in trash', 'portfolio-studio' ),
 			'filter_items_list'     => __( 'Filter portfolio items list', 'portfolio-studio' ),
 			'items_list'            => __( 'Portfolio items list', 'portfolio-studio' ),
 			'items_list_navigation' => __( 'Portfolio items list navigation', 'portfolio-studio' ),
@@ -306,13 +307,13 @@ class Portfolio_Studio_Content_Types {
 			'show_in_rest'       => true,
 			'has_archive'        => true,
 			'hierarchical'       => false,
-			'menu_position'      => 26,
+			'menu_position'      => 5,
 			'menu_icon'          => 'dashicons-portfolio',
 			'capability_type'    => 'post',
 			'supports'           => array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'author', 'revisions' ),
 			'rewrite'            => array(
 				'slug'       => 'portfolio',
-				'with_front' => false,
+				'with_front' => true,
 			),
 		);
 	}
@@ -329,20 +330,25 @@ class Portfolio_Studio_Content_Types {
 
 		if ( $hierarchical ) {
 			$labels = array(
-				'name'              => _x( 'Portfolio Categories', 'taxonomy general name', 'portfolio-studio' ),
-				'singular_name'     => _x( 'Portfolio Category', 'taxonomy singular name', 'portfolio-studio' ),
-				'menu_name'         => __( 'Portfolio Categories', 'portfolio-studio' ),
-				'all_items'         => __( 'All Portfolio Categories', 'portfolio-studio' ),
-				'edit_item'         => __( 'Edit Portfolio Category', 'portfolio-studio' ),
-				'view_item'         => __( 'View Portfolio Category', 'portfolio-studio' ),
-				'update_item'       => __( 'Update Portfolio Category', 'portfolio-studio' ),
-				'add_new_item'      => __( 'Add New Portfolio Category', 'portfolio-studio' ),
-				'new_item_name'     => __( 'New Portfolio Category Name', 'portfolio-studio' ),
-				'parent_item'       => __( 'Parent Portfolio Category', 'portfolio-studio' ),
-				'parent_item_colon' => __( 'Parent Portfolio Category:', 'portfolio-studio' ),
-				'search_items'      => __( 'Search Portfolio Categories', 'portfolio-studio' ),
-				'not_found'         => __( 'No portfolio categories found.', 'portfolio-studio' ),
-				'menu_name'         => __( 'Portfolio Categories', 'portfolio-studio' ),
+				'name'                       => _x( 'Portfolio Categories', 'taxonomy general name', 'portfolio-studio' ),
+				'singular_name'              => _x( 'Portfolio Category', 'taxonomy singular name', 'portfolio-studio' ),
+				'menu_name'                  => __( 'Portfolio Categories', 'portfolio-studio' ),
+				'all_items'                  => __( 'All Portfolio Categories', 'portfolio-studio' ),
+				'edit_item'                  => __( 'Edit Portfolio Category', 'portfolio-studio' ),
+				'view_item'                  => __( 'View Category', 'portfolio-studio' ),
+				'update_item'                => __( 'Update Portfolio Category', 'portfolio-studio' ),
+				'add_new_item'               => __( 'Add New Portfolio Category', 'portfolio-studio' ),
+				'new_item_name'              => __( 'New Portfolio Category Name', 'portfolio-studio' ),
+				'parent_item'                => __( 'Parent Portfolio Category', 'portfolio-studio' ),
+				'parent_item_colon'          => __( 'Parent Portfolio Category:', 'portfolio-studio' ),
+				'search_items'               => __( 'Search Portfolio Categories', 'portfolio-studio' ),
+				'not_found'                  => __( 'No portfolio categories found.', 'portfolio-studio' ),
+				'popular_items'              => __( 'Popular Portfolio Categories', 'portfolio-studio' ),
+				'separate_items_with_commas' => __( 'Separate portfolio categories with commas', 'portfolio-studio' ),
+				'add_or_remove_items'        => __( 'Add or remove portfolio categories', 'portfolio-studio' ),
+				'choose_from_most_used'      => __( 'Choose from the most used portfolio categories', 'portfolio-studio' ),
+				'items_list'                 => __( 'Portfolio categories list', 'portfolio-studio' ),
+				'items_list_navigation'      => __( 'Portfolio categories list navigation', 'portfolio-studio' ),
 			);
 		} else {
 			$labels = array(
@@ -351,7 +357,7 @@ class Portfolio_Studio_Content_Types {
 				'menu_name'                  => __( 'Portfolio Tags', 'portfolio-studio' ),
 				'all_items'                  => __( 'All Portfolio Tags', 'portfolio-studio' ),
 				'edit_item'                  => __( 'Edit Portfolio Tag', 'portfolio-studio' ),
-				'view_item'                  => __( 'View Portfolio Tag', 'portfolio-studio' ),
+				'view_item'                  => __( 'View Tag', 'portfolio-studio' ),
 				'update_item'                => __( 'Update Portfolio Tag', 'portfolio-studio' ),
 				'add_new_item'               => __( 'Add New Portfolio Tag', 'portfolio-studio' ),
 				'new_item_name'              => __( 'New Portfolio Tag Name', 'portfolio-studio' ),
@@ -362,7 +368,9 @@ class Portfolio_Studio_Content_Types {
 				'separate_items_with_commas' => __( 'Separate portfolio tags with commas', 'portfolio-studio' ),
 				'add_or_remove_items'        => __( 'Add or remove portfolio tags', 'portfolio-studio' ),
 				'choose_from_most_used'      => __( 'Choose from the most used portfolio tags', 'portfolio-studio' ),
-				'popular_items'              => __( 'Most used portfolio tags', 'portfolio-studio' ),
+				'popular_items'              => __( 'Popular Portfolio Tags', 'portfolio-studio' ),
+				'items_list'                 => __( 'Portfolio tags list', 'portfolio-studio' ),
+				'items_list_navigation'      => __( 'Portfolio tags list navigation', 'portfolio-studio' ),
 			);
 		}
 
@@ -377,8 +385,8 @@ class Portfolio_Studio_Content_Types {
 			'show_admin_column' => true,
 			'query_var'         => true,
 			'rewrite'           => array(
-				'slug'       => str_replace( '_', '-', $taxonomy ),
-				'with_front' => false,
+				'slug'       => $taxonomy,
+				'with_front' => true,
 			),
 		);
 	}

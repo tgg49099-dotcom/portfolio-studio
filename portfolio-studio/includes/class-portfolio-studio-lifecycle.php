@@ -51,12 +51,34 @@ class Portfolio_Studio_Lifecycle {
 	/**
 	 * Run on activation.
 	 *
+	 * On a multisite network, a network activation must configure EVERY site of the
+	 * network, not only the site the administrator happened to be on. The list of the
+	 * sites is read with `get_sites()`, the same way WordPress core activates a
+	 * network plugin. On a single site there is no network, and the current site is
+	 * configured — which is what `$network_wide` being false already says.
+	 *
 	 * @param bool $network_wide Whether the plugin is network activated.
 	 * @return void
 	 */
 	public static function activate( $network_wide = false ) {
-		unset( $network_wide );
+		if ( $network_wide ) {
+			$site_ids = self::network_site_ids();
 
+			if ( ! empty( $site_ids ) ) {
+				self::activate_sites( $site_ids );
+				return;
+			}
+		}
+
+		self::single_activate();
+	}
+
+	/**
+	 * Configure the plugin on the current site.
+	 *
+	 * @return void
+	 */
+	public static function single_activate() {
 		// Make sure the content types exist before the rewrite rules are rebuilt.
 		Portfolio_Studio_Content_Types::register();
 		Portfolio_Studio_Meta::register();
@@ -80,14 +102,121 @@ class Portfolio_Studio_Lifecycle {
 	}
 
 	/**
+	 * Configure the plugin on every site of a list.
+	 *
+	 * @param array<int,int> $site_ids The ids of the sites.
+	 * @return void
+	 */
+	public static function activate_sites( array $site_ids ) {
+		foreach ( $site_ids as $site_id ) {
+			if ( function_exists( 'switch_to_blog' ) ) {
+				switch_to_blog( (int) $site_id );
+			}
+
+			self::single_activate();
+
+			if ( function_exists( 'restore_current_blog' ) ) {
+				restore_current_blog();
+			}
+		}
+	}
+
+	/**
+	 * Configure the plugin on a site that has just been created.
+	 *
+	 * On a network, a site created after the network activation must be configured
+	 * too, exactly like the original plugin does on `wpmu_new_blog`.
+	 *
+	 * @param int|object $site The id of the new site, or the site itself.
+	 * @return void
+	 */
+	public static function activate_new_site( $site = 0 ) {
+		$blog_id = 0;
+
+		if ( is_numeric( $site ) ) {
+			$blog_id = (int) $site;
+		} elseif ( is_object( $site ) && isset( $site->blog_id ) ) {
+			$blog_id = (int) $site->blog_id;
+		}
+
+		if ( $blog_id <= 0 ) {
+			return;
+		}
+
+		if ( function_exists( 'switch_to_blog' ) ) {
+			switch_to_blog( $blog_id );
+		}
+
+		self::single_activate();
+
+		if ( function_exists( 'restore_current_blog' ) ) {
+			restore_current_blog();
+		}
+	}
+
+	/**
+	 * The ids of the sites of the network.
+	 *
+	 * The archived, the spam and the deleted sites are left out, exactly like the
+	 * original plugin does with its own query on the `blogs` table.
+	 *
+	 * @return array<int,int> The site ids; an empty array on a single site.
+	 */
+	protected static function network_site_ids() {
+		if ( ! function_exists( 'get_sites' ) ) {
+			return array();
+		}
+
+		$site_ids = get_sites(
+			array(
+				'fields' => 'ids',
+				'number' => 0,
+			)
+		);
+
+		if ( ! is_array( $site_ids ) ) {
+			return array();
+		}
+
+		return array_map( 'intval', $site_ids );
+	}
+
+	/**
 	 * Run on deactivation.
 	 *
 	 * @param bool $network_wide Whether the plugin is network deactivated.
 	 * @return void
 	 */
 	public static function deactivate( $network_wide = false ) {
-		unset( $network_wide );
+		if ( $network_wide ) {
+			$site_ids = self::network_site_ids();
 
+			if ( ! empty( $site_ids ) ) {
+				foreach ( $site_ids as $site_id ) {
+					if ( function_exists( 'switch_to_blog' ) ) {
+						switch_to_blog( (int) $site_id );
+					}
+
+					self::single_deactivate();
+
+					if ( function_exists( 'restore_current_blog' ) ) {
+						restore_current_blog();
+					}
+				}
+
+				return;
+			}
+		}
+
+		self::single_deactivate();
+	}
+
+	/**
+	 * Clean up the current site.
+	 *
+	 * @return void
+	 */
+	public static function single_deactivate() {
 		self::remove_default_terms();
 		delete_option( self::OPTION );
 

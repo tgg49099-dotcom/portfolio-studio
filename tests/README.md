@@ -35,6 +35,7 @@ phases. It never writes outside `WP_DIR` and `PS_FIXTURES`.
 | --- | --- | --- |
 | `suite.php` | `solo`, `activated`, `deactivated`, `coexistence` | the content type and the taxonomies are registered once and never overwrite an existing registration; the four metadata keys keep their declared type through a round trip; the activation and the deactivation leave nothing behind. |
 | `suite-j1b.php` | `j1b-defaut1-*`, `j1b-defaut2`, `j1b-defaut3-*`, `j1b-readme` | the three defects found by the hostile review stay fixed: a category the plugin did not create is never deleted, the optional metadata cleanup really removes the rows, and an existing taxonomy is reused instead of duplicated. |
+| `suite-parite.php` | `parite` | the five parity fixes measured against the original plugin: the URL slugs of the taxonomies, `rewrite.with_front`, the position of the admin menu, the admin labels and the multisite activation. |
 | `suite-secu.php` | `secu-hostile` | a hostile string typed in the editor panel never reaches the database nor the rendered page. |
 
 The `coexistence` phase needs another portfolio plugin on the site (the runner uses
@@ -86,6 +87,37 @@ with the explicit opt-in — and asserts that:
 The same test is then run against a witness that deletes the `portfolio` items: the
 test **must** fail. The witness is written to a temporary folder at every run — a
 script that deletes the items of a site has no business in a public repository.
+
+## The counter-proof of the five parity fixes
+
+`suite-parite.php` compares the objects WordPress actually registered with the
+values of the **original** plugin (`portfolio-post-type` 1.0.1, the stable tag the
+40 000 installations run). A test that cannot fail proves nothing, so the same
+suite is run against the plugin **as it was before the five fixes**: the three
+files of that version are shipped in `tests/variants/parite-avant/` — they are the
+published files of the previous commit, not a hand-written variant.
+
+```bash
+bash tests/run-parite-proof.sh /path/to/wordpress
+```
+
+It prints:
+
+- the result of the suite against the plugin as it is (it must pass);
+- the result of the same suite against the previous version (it **must fail**, and
+  each of the five defects must be caught by at least one assertion);
+- the result of the suite once the corrected files are put back (it must pass again).
+
+The script takes the WordPress path as its first argument, the folder of the
+previous version as its second and the folder of the plugin as its third:
+
+```bash
+bash tests/run-parite-proof.sh /path/to/wordpress tests/variants/parite-avant portfolio-studio
+```
+
+The multisite API is not loaded on a single site since WordPress 6.4: the suite
+loads it itself and injects the list of the sites with the `sites_pre_query`
+filter. Nothing is written to the network tables.
 
 ## Writing a test
 
