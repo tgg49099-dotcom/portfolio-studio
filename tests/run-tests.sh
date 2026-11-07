@@ -85,6 +85,18 @@ run_phase() {
 
 say ""
 say "--- suite.php : registration, metadata, lifecycle ---"
+# Precondition of the `activated` phase: the site has no portfolio category
+# yet, so the plugin is the one that creates it — and owns it. A category that
+# already existed belongs to somebody else and the plugin leaves it alone
+# (that is exactly what the J1b suite tests). Only the portfolio taxonomies
+# are touched, never the `category` taxonomy of the site.
+wp_cmd eval-file "$HERE/clean-default-term.php" > "$FIXTURES/clean-default-term.log" 2>&1
+# The plugin is deactivated first: `wp plugin activate` on a plugin that is
+# already active does NOT run the activation hook again, and the `activated`
+# phase asserts what that hook creates (the state option, the default
+# category). Deactivating first makes the harness independent of the state the
+# site was left in.
+wp_cmd plugin deactivate portfolio-studio > /dev/null 2>&1
 wp_cmd plugin activate portfolio-studio > "$FIXTURES/activate.log" 2>&1
 ACT_RC=$?
 if [ $ACT_RC -ne 0 ]; then
