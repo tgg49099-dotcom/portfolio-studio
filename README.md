@@ -122,7 +122,8 @@ version 2 or later (GPL-2.0-or-later)**.
 The WordPress.org plugin directory only accepts GPL-compatible plugins, and the plugin
 published there is the code of this repository, so the repository carries the same
 license. The full text of the GPL version 2 is in [`LICENSE`](LICENSE); the plugin
-folder also carries its own copy in [`portfolio-studio/LICENSE`](portfolio-studio/LICENSE).
+folder carries no copy of it, so that the plugin directory published on
+WordPress.org is **exactly** the code of this repository, file for file.
 
 The grant is *"version 2 or later"*, and it is declared in the headers of the files
 (`portfolio-studio/portfolio-studio.php` and `portfolio-studio/readme.txt` both say
