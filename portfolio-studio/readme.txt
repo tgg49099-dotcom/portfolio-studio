@@ -4,7 +4,7 @@ Tags: portfolio, projects, clients, custom post type
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 0.1.1
+Stable tag: 0.1.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,11 +58,20 @@ stored and shown in the editor the same way for every item.
 
 = Are the project details private? =
 
-The WordPress REST API does not publish them: the portfolio content type does not
-declare the custom fields support, so the API does not expose the details at all.
-They live in your own database and are shown in the editor, and only the people who
-can edit the item can change them. Do not put anything confidential in them anyway:
-that is a property of the content type, not a promise of the plugin.
+With the content type this plugin registers, the WordPress REST API does not publish
+them: that content type does not declare the custom fields support, so the API does
+not expose the details at all. They live in your own database and are shown in the
+editor, and only the people who can edit the item can change them. Do not put anything
+confidential in them anyway: that is a property of the content type, not a promise
+of the plugin. If another plugin owns that content type and declares the custom fields
+support, the API can expose them: check that before you type anything private.
+
+= Does the plugin create a category of its own? =
+
+On activation, Portfolio Studio creates one default category in the portfolio categories,
+and only when the portfolio categories do not already hold one with that name: it never
+adds a second list next to the categories you already have. It removes that default
+category when you deactivate the plugin, unless one of your items already uses it.
 
 = What happens when I deactivate the plugin? =
 
@@ -82,8 +91,13 @@ for a security issue.
 
 == Changelog ==
 
+= 0.1.2 =
+* Multisite: a site created later on a network is configured only when the plugin is
+  activated for the whole network. The sites of the network where the plugin is not
+  activated are left untouched.
+* Internal: the deprecated WordPress hook `wpmu_new_blog` is no longer used.
+
 = 0.1.1 =
-* 5 correctifs de parite avec Portfolio Post Type
 * Parity fixes: the category and tag URL slugs, the permalink prefix, the admin menu
   position, the admin labels and the multisite activation now match the original
   Portfolio Post Type plugin exactly.

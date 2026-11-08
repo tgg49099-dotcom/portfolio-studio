@@ -3,7 +3,7 @@
  * Plugin Name:       Portfolio Studio
  * Plugin URI:        https://github.com/tgg49099-dotcom/portfolio-studio
  * Description:       Editorial portfolio for WordPress: a portfolio content type, categories and tags, and per-item details (client, year, role, technologies).
- * Version:           0.1.1
+ * Version:           0.1.2
  * Requires at least: 6.5
  * Requires PHP:      7.4
  * Author:            Tgg Labs
@@ -32,7 +32,7 @@ if ( defined( 'PORTFOLIO_STUDIO_VERSION' ) ) {
 	return;
 }
 
-define( 'PORTFOLIO_STUDIO_VERSION', '0.1.1' );
+define( 'PORTFOLIO_STUDIO_VERSION', '0.1.2' );
 define( 'PORTFOLIO_STUDIO_SLUG', 'portfolio-studio' );
 define( 'PORTFOLIO_STUDIO_FILE', __FILE__ );
 define( 'PORTFOLIO_STUDIO_DIR', plugin_dir_path( __FILE__ ) );
@@ -47,9 +47,11 @@ register_activation_hook( __FILE__, array( 'Portfolio_Studio_Lifecycle', 'activa
 register_deactivation_hook( __FILE__, array( 'Portfolio_Studio_Lifecycle', 'deactivate' ) );
 
 // On a multisite network, a site created after the network activation must be
-// configured too. `wpmu_new_blog` is the hook the original plugin uses;
-// `wp_initialize_site` is the one WordPress actually fires today.
-add_action( 'wpmu_new_blog', array( 'Portfolio_Studio_Lifecycle', 'activate_new_site' ) );
+// configured too. `wp_initialize_site` is the hook WordPress fires today;
+// `wpmu_new_blog` is deprecated since WordPress 5.1 and is not used any more
+// (listening to it would also make WordPress raise a deprecation notice on
+// every site creation). The new site is configured only when the plugin is
+// activated for the whole network — see `Portfolio_Studio_Lifecycle::activate_new_site()`.
 add_action( 'wp_initialize_site', array( 'Portfolio_Studio_Lifecycle', 'activate_new_site' ) );
 
 /**

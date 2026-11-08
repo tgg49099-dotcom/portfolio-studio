@@ -125,12 +125,19 @@ class Portfolio_Studio_Lifecycle {
 	 * Configure the plugin on a site that has just been created.
 	 *
 	 * On a network, a site created after the network activation must be configured
-	 * too, exactly like the original plugin does on `wpmu_new_blog`.
+	 * too. The site is configured ONLY when the plugin is activated for the whole
+	 * network: without that condition, the plugin would write its settings and
+	 * create its default category into sites of the network where it is not
+	 * activated — sites that never asked for it.
 	 *
 	 * @param int|object $site The id of the new site, or the site itself.
 	 * @return void
 	 */
 	public static function activate_new_site( $site = 0 ) {
+		if ( ! self::is_network_active() ) {
+			return;
+		}
+
 		$blog_id = 0;
 
 		if ( is_numeric( $site ) ) {
@@ -152,6 +159,32 @@ class Portfolio_Studio_Lifecycle {
 		if ( function_exists( 'restore_current_blog' ) ) {
 			restore_current_blog();
 		}
+	}
+
+	/**
+	 * Whether the plugin is activated for the whole network.
+	 *
+	 * The list of the network activated plugins is the network option
+	 * `active_sitewide_plugins`. It is read directly, and not through
+	 * `is_plugin_active_for_network()`, because that helper lives in the
+	 * administration (`wp-admin/includes/plugin.php`), is not loaded when a site
+	 * is created from the REST API or from the command line, and answers `false`
+	 * on a site that is not a network.
+	 *
+	 * @return bool True when the plugin is activated for the whole network.
+	 */
+	public static function is_network_active() {
+		$basename = defined( 'PORTFOLIO_STUDIO_BASENAME' )
+			? PORTFOLIO_STUDIO_BASENAME
+			: plugin_basename( dirname( __DIR__ ) . '/portfolio-studio.php' );
+
+		$network_plugins = get_site_option( 'active_sitewide_plugins', array() );
+
+		if ( ! is_array( $network_plugins ) ) {
+			return false;
+		}
+
+		return isset( $network_plugins[ $basename ] );
 	}
 
 	/**

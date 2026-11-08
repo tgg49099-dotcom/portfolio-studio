@@ -313,12 +313,12 @@ if ( ! function_exists( 'get_sites' ) ) {
 }
 
 PS_Test_Runner::ok(
-	false !== has_action( 'wpmu_new_blog' ),
-	'BUG 5 : le plugin ecoute wpmu_new_blog'
-);
-PS_Test_Runner::ok(
 	false !== has_action( 'wp_initialize_site' ),
 	'BUG 5 : le plugin ecoute wp_initialize_site'
+);
+PS_Test_Runner::ok(
+	false === has_action( 'wpmu_new_blog' ),
+	'BUG 5 : le plugin n ecoute plus le crochet deprecie wpmu_new_blog'
 );
 
 // The sites visited by the plugin are counted with the `switch_blog` action.
@@ -331,12 +331,22 @@ $ps_parite_listener  = function ( $new_blog_id, $prev_blog_id, $context ) use ( 
 add_action( 'switch_blog', $ps_parite_listener, 10, 3 );
 
 // --- a new site is configured as soon as it is created ----------------------
+// The site is configured ONLY when the plugin is activated for the whole network:
+// on a network where the plugin is activated on a single site only, the sites that
+// are created later must be left alone — the plugin has no business writing there.
 $ps_parite_switched = array();
-do_action( 'wpmu_new_blog', 1 );
+do_action( 'wp_initialize_site', (object) array( 'blog_id' => 1 ) );
 PS_Test_Runner::same(
-	array( 1 ),
+	array(),
 	$ps_parite_switched,
-	'BUG 5 : la creation d un site configure ce site'
+	'BUG 5 : un site nouveau n est PAS configure quand le plugin n est pas active pour le reseau'
+);
+
+// The same site IS configured when the plugin is activated for the whole network.
+$ps_parite_network_before = get_site_option( 'active_sitewide_plugins', null );
+update_site_option(
+	'active_sitewide_plugins',
+	array( 'portfolio-studio/portfolio-studio.php' => time() )
 );
 
 $ps_parite_switched = array();
@@ -344,8 +354,14 @@ do_action( 'wp_initialize_site', (object) array( 'blog_id' => 1 ) );
 PS_Test_Runner::same(
 	array( 1 ),
 	$ps_parite_switched,
-	'BUG 5 : wp_initialize_site configure le site cree'
+	'BUG 5 : wp_initialize_site configure le site cree quand le plugin est active pour le reseau'
 );
+
+if ( null === $ps_parite_network_before ) {
+	delete_site_option( 'active_sitewide_plugins' );
+} else {
+	update_site_option( 'active_sitewide_plugins', $ps_parite_network_before );
+}
 
 // --- a network activation configures every site of the network -------------
 $ps_parite_sites = function () {

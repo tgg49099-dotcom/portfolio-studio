@@ -27,6 +27,7 @@ WP_DIR="${1:-${WP_DIR:-}}"
 WP_CLI="${WP_CLI:-wp}"
 AVANT="${2:-$HERE/variants/parite-avant}"
 SRC="${3:-$REPO/portfolio-studio}"
+AVANT_MULTI="${4:-$HERE/variants/multisite-avant}"
 
 if [ -z "$WP_DIR" ] || [ ! -d "$WP_DIR" ]; then
 	echo "usage: bash tests/run-parite-proof.sh /path/to/wordpress [avant-dir]"
@@ -34,6 +35,10 @@ if [ -z "$WP_DIR" ] || [ ! -d "$WP_DIR" ]; then
 fi
 if [ ! -d "$AVANT" ]; then
 	echo "ECHEC: le dossier de la variante avant correction est introuvable : $AVANT"
+	exit 2
+fi
+if [ ! -d "$AVANT_MULTI" ]; then
+	echo "ECHEC: le dossier de la variante avant la correction multisite est introuvable : $AVANT_MULTI"
 	exit 2
 fi
 if [ ! -d "$SRC" ]; then
@@ -138,7 +143,60 @@ else
 	say "  -> OK : la suite repasse apres restitution"
 fi
 
-# --- 4. restore the test site ---------------------------------------------
+# --- 4. ROUGE : the plugin of BEFORE the multisite correction ---------------
+# The variant is the 0.1.1 code: it listens to the deprecated hook and it
+# configures every new site of the network, even the ones where the plugin is
+# not activated. The same suite must catch both.
+say ""
+say "--- 4. ROUGE : le plugin d avant la correction multisite (variante multisite-avant) ---"
+for f in portfolio-studio.php includes/class-portfolio-studio-lifecycle.php; do
+	cp -f "$AVANT_MULTI/$(basename "$f")" "$TARGET/$f"
+done
+wp_cmd plugin deactivate portfolio-studio > /dev/null 2>&1
+wp_cmd plugin activate portfolio-studio > "$FIXTURES/activate-multi-rouge.log" 2>&1
+PS_PHASE=parite wp_cmd eval-file "$HERE/suite-parite.php" --user=1 > "$FIXTURES/parite-multi-rouge.log" 2>&1
+MULTI_ROUGE_RC=$?
+say "  assertions rouges : $(grep -c '^not ok ' "$FIXTURES/parite-multi-rouge.log")"
+grep '^not ok ' "$FIXTURES/parite-multi-rouge.log" | sed 's/^/  /'
+if [ $MULTI_ROUGE_RC -eq 0 ]; then
+	say "  -> ECHEC : la suite aurait du ECHOUER sur la variante d avant la correction multisite"
+	FAILURES=$(( FAILURES + 1 ))
+else
+	say "  -> OK : la suite ECHOUE bien sur la variante d avant la correction multisite"
+fi
+
+# Each new assertion must be one of the red ones.
+for marker in \
+	"n ecoute plus le crochet deprecie" \
+	"n est PAS configure quand le plugin n est pas active pour le reseau"
+do
+	COUNT=$(grep "^not ok .*${marker}" "$FIXTURES/parite-multi-rouge.log" | grep -c . || true)
+	if [ "$COUNT" -eq 0 ]; then
+		say "  -> ECHEC : aucune assertion rouge pour « ${marker} »"
+		FAILURES=$(( FAILURES + 1 ))
+	else
+		say "  -> OK : « ${marker} » : ${COUNT} assertion(s) rouge(s)"
+	fi
+done
+
+# --- 5. VERT again ---------------------------------------------------------
+say ""
+say "--- 5. VERT : les fichiers corriges sont restitues ---"
+rm -rf "$TARGET"
+cp -a "$SRC" "$TARGET"
+wp_cmd plugin deactivate portfolio-studio > /dev/null 2>&1
+wp_cmd plugin activate portfolio-studio > "$FIXTURES/activate-vert3.log" 2>&1
+PS_PHASE=parite wp_cmd eval-file "$HERE/suite-parite.php" --user=1 > "$FIXTURES/parite-vert3.log" 2>&1
+VERT3_RC=$?
+grep -E '^(not ok|# passed|# failed|1\.\.)' "$FIXTURES/parite-vert3.log" | sed 's/^/  /'
+if [ $VERT3_RC -ne 0 ]; then
+	say "  -> ECHEC : la suite doit repasser apres restitution"
+	FAILURES=$(( FAILURES + 1 ))
+else
+	say "  -> OK : la suite repasse apres restitution"
+fi
+
+# --- 6. restore the test site ---------------------------------------------
 say ""
 say "--- restitution du site de test ---"
 wp_cmd plugin deactivate portfolio-studio > /dev/null 2>&1
