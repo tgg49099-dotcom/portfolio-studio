@@ -12,6 +12,8 @@ Editorial portfolio for WordPress: a portfolio content type with client, year, r
 
 == Description ==
 
+Replacing Portfolio Post Type? Deactivate it, activate Portfolio Studio: your items, categories and tags stay.
+
 Portfolio Studio turns WordPress into an editorial portfolio: a `portfolio` content type,
 a category and a tag taxonomy, and four project details for every item — **client**,
 **year**, **role** and **technologies**.
@@ -66,6 +68,12 @@ that is a property of the content type, not a promise of the plugin.
 
 The plugin removes its own settings and the default category it created, and nothing else.
 The details you typed on your portfolio items stay in place.
+
+= How do I report a security issue? =
+
+Please report it privately to tgg.apps.support@gmail.com, with the plugin version, your WordPress
+version and the steps needed to reproduce the issue. Please do not open a public support thread
+for a security issue.
 
 == Screenshots ==
 
