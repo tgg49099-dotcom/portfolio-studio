@@ -190,8 +190,13 @@ class Portfolio_Studio_Lifecycle {
 	/**
 	 * The ids of the sites of the network.
 	 *
-	 * The archived, the spam and the deleted sites are left out, exactly like the
-	 * original plugin does with its own query on the `blogs` table.
+	 * The archived, the spam and the deleted sites are left out: the three flags
+	 * below are handed to `get_sites()`, so `WP_Site_Query` adds `archived = 0`,
+	 * `spam = 0` and `deleted = 0` to its SQL query and returns only the sites
+	 * that are really in use. Without them the query would carry no filter at
+	 * all — the defaults of `WP_Site_Query` are `null` — and the plugin would
+	 * write its option, its category and its rewrite rules into the archived,
+	 * spam and deleted sites of the network.
 	 *
 	 * @return array<int,int> The site ids; an empty array on a single site.
 	 */
@@ -202,8 +207,11 @@ class Portfolio_Studio_Lifecycle {
 
 		$site_ids = get_sites(
 			array(
-				'fields' => 'ids',
-				'number' => 0,
+				'fields'   => 'ids',
+				'number'   => 0,
+				'archived' => 0,
+				'spam'     => 0,
+				'deleted'  => 0,
 			)
 		);
 
