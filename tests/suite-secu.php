@@ -157,6 +157,38 @@ if ( 'secu-hostile' === $ps_phase ) {
 	$ps_fields_source = file_exists( $ps_fields ) ? (string) file_get_contents( $ps_fields ) : '';
 	$ps_meta_source   = file_exists( $ps_meta ) ? (string) file_get_contents( $ps_meta ) : '';
 
+	/*
+	 * The chain the write path must have, ONE PATTERN PER DETAIL.
+	 *
+	 * A single pattern for the four details cannot be right: the panel does not
+	 * clean the four values the same way, and the code says so.
+	 *
+	 *   client, role      sanitize_<detail>( sanitize_text_field( wp_unslash( $_POST[...] ) ) )
+	 *                     -> the value is cleaned twice: once by the WordPress sanitiser, so
+	 *                        that the static analyser sees the cleaning, then by the
+	 *                        sanitiser registered for the meta key.
+	 *   year              sanitize_year( is_scalar( $_POST[...] ) ? intval( wp_unslash( $_POST[...] ) ) : 0 )
+	 *                     -> a number: intval() replaces the WordPress sanitiser.
+	 *   technologies      sanitize_technologies( wp_unslash( $_POST[...] ) )
+	 *                     -> the list is cleaned label by label, once it has been split.
+	 *
+	 * The old pattern, `sanitize_<detail>\(\s*wp_unslash\(`, was narrower than the code:
+	 * it did not match the client, the role (both cleaned twice) nor the year (cleaned
+	 * through intval), and it reported three false negatives on a code that is STRICTER
+	 * than the pattern requires.
+	 *
+	 * The `sanitize_text_field` is REQUIRED for the client and the role, and not
+	 * optional: an optional group would still match a panel whose first cleaning had
+	 * been removed, and the counter-proof of this suite (`tests/run-counter-proof.sh`)
+	 * would then prove nothing.
+	 */
+	$ps_chains = array(
+		'client'       => '/Portfolio_Studio_Meta::sanitize_client\(\s*sanitize_text_field\(\s*wp_unslash\(/',
+		'role'         => '/Portfolio_Studio_Meta::sanitize_role\(\s*sanitize_text_field\(\s*wp_unslash\(/',
+		'year'         => '/Portfolio_Studio_Meta::sanitize_year\([^;]*?wp_unslash\(/',
+		'technologies' => '/Portfolio_Studio_Meta::sanitize_technologies\(\s*wp_unslash\(/',
+	);
+
 	foreach ( array( 'client', 'year', 'role', 'technologies' ) as $ps_detail ) {
 		PS_Test_Runner::ok(
 			(bool) preg_match( '/\$_POST\[\s*Portfolio_Studio_Meta::KEY_' . strtoupper( $ps_detail ) . '\s*\]/', $ps_fields_source ),
@@ -164,7 +196,7 @@ if ( 'secu-hostile' === $ps_phase ) {
 		);
 
 		PS_Test_Runner::ok(
-			(bool) preg_match( '/Portfolio_Studio_Meta::sanitize_' . $ps_detail . '\(\s*wp_unslash\(/', $ps_fields_source ),
+			(bool) preg_match( $ps_chains[ $ps_detail ], $ps_fields_source ),
 			'the editor panel passes the ' . $ps_detail . ' through its sanitiser'
 		);
 	}
@@ -183,7 +215,7 @@ if ( 'secu-hostile' === $ps_phase ) {
 
 	// The proof is printed in the log: the reader sees the chain, not a claim.
 	ps_show_line( $ps_fields, '$client = isset( $_POST[', 'the write path reads the request' );
-	ps_show_line( $ps_fields, 'Portfolio_Studio_Meta::sanitize_client( wp_unslash(', 'the write path calls the sanitiser' );
+	ps_show_line( $ps_fields, 'Portfolio_Studio_Meta::sanitize_client( sanitize_text_field( wp_unslash(', 'the write path calls the sanitiser' );
 	ps_show_line( $ps_meta, 'return sanitize_text_field( (string) $value );', 'the sanitiser calls the WordPress sanitiser' );
 
 	// ---------------------------------------------------------------------

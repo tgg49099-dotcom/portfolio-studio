@@ -37,7 +37,7 @@ If your site has no portfolio content type yet, Portfolio Studio simply register
 
 1. Upload the plugin folder to `/wp-content/plugins/`, or install it from the Plugins screen.
 2. Activate it from the Plugins screen.
-3. Open **Portfolio → Add New Item** and fill in the project details.
+3. Open **Portfolio → Add New Portfolio Item** and fill in the project details.
 4. Manage the categories under **Portfolio Categories** and the technologies under the item itself.
 
 Deactivating the plugin removes its own settings and the default category it created, and
@@ -68,10 +68,11 @@ support, the API can expose them: check that before you type anything private.
 
 = Does the plugin create a category of its own? =
 
-On activation, Portfolio Studio creates one default category in the portfolio categories,
-and only when the portfolio categories do not already hold one with that name: it never
-adds a second list next to the categories you already have. It removes that default
-category when you deactivate the plugin, unless one of your items already uses it.
+On activation, Portfolio Studio creates one default category in the portfolio categories —
+the one named `Uncategorized`, with the slug `uncategorized` — and only when the portfolio
+categories do not already hold that category: it never adds a second list next to the
+categories you already have. It removes that default category when you deactivate the
+plugin, unless one of your items already uses it.
 
 = What happens when I deactivate the plugin? =
 

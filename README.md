@@ -18,7 +18,8 @@ repository: nothing else.
   they are missing. Hyphenated aliases used by other plugins (`portfolio-category`,
   `portfolio-tag`) are detected and reused.
 - Stores four project details per item, each with a declared type, sanitised on
-  every write path, and exposed to the REST API.
+  every write path, and registered for the REST API. The content type does not
+  declare the `custom-fields` support, so the API does not publish them.
 - Creates no custom database table. On deactivation it removes its own option and
   the default category **it** created, and nothing else.
 
@@ -31,7 +32,6 @@ portfolio-studio/          The plugin, exactly as it is shipped.
   readme.txt               The readme of the WordPress.org listing.
   uninstall.php            Cleanup, run when the plugin is deleted.
   assets/                  The screenshots of the listing (screenshot-1.png, screenshot-2.png).
-  LICENSE                  GPL-2.0-or-later (required by WordPress.org).
 assets/                    The images of the WordPress.org listing page.
 tests/                     The test harness (see tests/README.md).
 LICENSE                    GPL-2.0-or-later — the license of the whole repository.

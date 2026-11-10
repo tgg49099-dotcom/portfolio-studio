@@ -9,9 +9,12 @@
 # This script does not argue that they are false positives: it injects a hostile
 # string through the real save path and checks what comes out.
 #
-#   1. VERT  — the suite passes against the plugin as it is.
-#   2. ROUGE — the same suite fails against a variant whose sanitiser does not
-#              sanitise. A test that cannot fail proves nothing.
+#   1. VERT   — the suite passes against the plugin as it is.
+#   2. ROUGE  — the same suite fails against a variant whose sanitiser does not
+#               sanitise (class-portfolio-studio-meta.php).
+#   3. ROUGE 2 — the same suite fails against a variant whose editor panel lost
+#               its first cleaning (class-portfolio-studio-fields.php).
+#               A test that cannot fail proves nothing.
 #
 # Environment variables:
 #   WP_DIR   path of the WordPress installation (default: the first argument)
@@ -87,6 +90,35 @@ else
 		FAILURES=$(( FAILURES + 1 ))
 	else
 		say "  -> OK : la suite ECHOUE bien sur la variante non assainie"
+	fi
+fi
+
+# --- 2b. ROUGE 2 : la variante dont le PREMIER assainissement a ete retire -----
+# The first cleaning of the write path (sanitize_text_field) is what the
+# WordPress.org static analyser looks at. The suite asserts that the panel has
+# it: this variant removes it and the suite MUST fail.
+say ""
+say "--- ROUGE 2 : la variante dont le premier assainissement du panneau a ete retire ---"
+rm -rf "$PLUGDIR/portfolio-studio"
+cp -a "$REPO/portfolio-studio" "$PLUGDIR/portfolio-studio"
+python3 -I "$HERE/build-unsanitised-fields-variant.py" \
+	"$REPO/portfolio-studio/includes/class-portfolio-studio-fields.php" \
+	"$PLUGDIR/portfolio-studio/includes/class-portfolio-studio-fields.php" > "$FIXTURES/build-fields.log" 2>&1
+BUILD2_RC=$?
+cat "$FIXTURES/build-fields.log" | sed 's/^/  /'
+if [ $BUILD2_RC -ne 0 ]; then
+	say "  -> ECHEC : la variante affaiblie n'a pas pu etre construite"
+	FAILURES=$(( FAILURES + 1 ))
+else
+	PS_PHASE=secu-hostile wp_cmd eval-file "$HERE/suite-secu.php" --user=1 > "$FIXTURES/secu-rouge2.log" 2>&1
+	ROUGE2_RC=$?
+	grep -E '^(not ok|# passed|# failed|1\.\.)' "$FIXTURES/secu-rouge2.log" | sed 's/^/  /'
+	grep -c '^not ok ' "$FIXTURES/secu-rouge2.log" | sed 's/^/  assertions rouges : /'
+	if [ $ROUGE2_RC -eq 0 ]; then
+		say "  -> ECHEC : la suite aurait du ECHOUER sur la variante affaiblie"
+		FAILURES=$(( FAILURES + 1 ))
+	else
+		say "  -> OK : la suite ECHOUE bien sur la variante affaiblie"
 	fi
 fi
 
