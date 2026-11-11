@@ -17,10 +17,20 @@
  *
  *   $_POST[ KEY ]                                   fields.php  (the read)
  *     -> wp_unslash()                              fields.php  (slashes removed)
+ *     -> sanitize_text_field() / intval()          fields.php  (the WordPress sanitiser
+ *                                                        the static analyser can see)
  *     -> Portfolio_Studio_Meta::sanitize_*()       meta.php    (the sanitiser)
  *          -> sanitize_text_field()                meta.php    (the WordPress sanitiser)
  *     -> update_post_meta()                        fields.php  (the write)
  *     -> sanitize_meta() -> the registered sanitize_callback (meta.php) -> same sanitiser
+ *
+ * Since cycle 165 the three scalar details (client, year, role) are cleaned twice:
+ * a WordPress sanitiser that the static analyser can see, then the sanitiser of the
+ * meta key. Both steps store exactly the same values (proof:
+ * /work/preuves/cycle165/diff-code-livre.log, 22 132 inputs, 0 difference). The
+ * technologies are cleaned label by label by their own sanitiser: a single WordPress
+ * sanitiser on the whole list would change what is stored, so the warning is
+ * neutralised on that line, with the reason written next to it.
  *
  * The same hostile string is injected three ways:
  *   1. directly into the sanitiser,
@@ -141,6 +151,32 @@ function ps_markup_markers( $value ) {
 	return $ps_found;
 }
 
+/**
+ * Extract the statement of PHP code that contains a needle.
+ *
+ * The statement is the piece of code between two semicolons: it is the unit that
+ * says what is done with the value read from the request.
+ *
+ * @param string $source PHP source code.
+ * @param string $needle Text the statement must contain.
+ * @return string The statement, or an empty string when the needle is nowhere.
+ */
+function ps_statement_around( $source, $needle ) {
+	$ps_position = strpos( $source, $needle );
+	if ( false === $ps_position ) {
+		return '';
+	}
+
+	$ps_before = substr( $source, 0, $ps_position );
+	$ps_start  = strrpos( $ps_before, ';' );
+	$ps_start  = ( false === $ps_start ) ? 0 : $ps_start + 1;
+
+	$ps_end = strpos( $source, ';', $ps_position );
+	$ps_end = ( false === $ps_end ) ? strlen( $source ) : $ps_end + 1;
+
+	return substr( $source, $ps_start, $ps_end - $ps_start );
+}
+
 if ( 'secu-hostile' === $ps_phase ) {
 
 	$ps_plugin_dir = WP_PLUGIN_DIR . '/portfolio-studio';
@@ -157,49 +193,54 @@ if ( 'secu-hostile' === $ps_phase ) {
 	$ps_fields_source = file_exists( $ps_fields ) ? (string) file_get_contents( $ps_fields ) : '';
 	$ps_meta_source   = file_exists( $ps_meta ) ? (string) file_get_contents( $ps_meta ) : '';
 
-	/*
-	 * The chain the write path must have, ONE PATTERN PER DETAIL.
-	 *
-	 * A single pattern for the four details cannot be right: the panel does not
-	 * clean the four values the same way, and the code says so.
-	 *
-	 *   client, role      sanitize_<detail>( sanitize_text_field( wp_unslash( $_POST[...] ) ) )
-	 *                     -> the value is cleaned twice: once by the WordPress sanitiser, so
-	 *                        that the static analyser sees the cleaning, then by the
-	 *                        sanitiser registered for the meta key.
-	 *   year              sanitize_year( is_scalar( $_POST[...] ) ? intval( wp_unslash( $_POST[...] ) ) : 0 )
-	 *                     -> a number: intval() replaces the WordPress sanitiser.
-	 *   technologies      sanitize_technologies( wp_unslash( $_POST[...] ) )
-	 *                     -> the list is cleaned label by label, once it has been split.
-	 *
-	 * The old pattern, `sanitize_<detail>\(\s*wp_unslash\(`, was narrower than the code:
-	 * it did not match the client, the role (both cleaned twice) nor the year (cleaned
-	 * through intval), and it reported three false negatives on a code that is STRICTER
-	 * than the pattern requires.
-	 *
-	 * The `sanitize_text_field` is REQUIRED for the client and the role, and not
-	 * optional: an optional group would still match a panel whose first cleaning had
-	 * been removed, and the counter-proof of this suite (`tests/run-counter-proof.sh`)
-	 * would then prove nothing.
-	 */
-	$ps_chains = array(
-		'client'       => '/Portfolio_Studio_Meta::sanitize_client\(\s*sanitize_text_field\(\s*wp_unslash\(/',
-		'role'         => '/Portfolio_Studio_Meta::sanitize_role\(\s*sanitize_text_field\(\s*wp_unslash\(/',
-		'year'         => '/Portfolio_Studio_Meta::sanitize_year\([^;]*?wp_unslash\(/',
-		'technologies' => '/Portfolio_Studio_Meta::sanitize_technologies\(\s*wp_unslash\(/',
-	);
-
 	foreach ( array( 'client', 'year', 'role', 'technologies' ) as $ps_detail ) {
 		PS_Test_Runner::ok(
 			(bool) preg_match( '/\$_POST\[\s*Portfolio_Studio_Meta::KEY_' . strtoupper( $ps_detail ) . '\s*\]/', $ps_fields_source ),
 			'the editor panel reads the ' . $ps_detail . ' from the request'
 		);
 
+		/*
+		 * The statement that reads the field must pass the value through the
+		 * sanitiser of the meta key. Since cycle 165 that statement cleans the
+		 * value twice — a WordPress sanitiser that the static analyser can see,
+		 * then the sanitiser of the meta key — so the test looks for the whole
+		 * statement instead of one literal shape.
+		 */
+		$ps_statement = ps_statement_around(
+			$ps_fields_source,
+			'$_POST[ Portfolio_Studio_Meta::KEY_' . strtoupper( $ps_detail ) . ' ]'
+		);
+
 		PS_Test_Runner::ok(
-			(bool) preg_match( $ps_chains[ $ps_detail ], $ps_fields_source ),
+			( false !== strpos( $ps_statement, 'Portfolio_Studio_Meta::sanitize_' . $ps_detail . '(' ) )
+			&& ( false !== strpos( $ps_statement, 'wp_unslash(' ) ),
 			'the editor panel passes the ' . $ps_detail . ' through its sanitiser'
 		);
 	}
+
+	/*
+	 * Since cycle 165 the three scalar details are cleaned by a WordPress sanitiser
+	 * that the static analyser can see, so that Plugin Check has nothing to report
+	 * on them. The technologies keep their own sanitiser, label by label: a single
+	 * WordPress sanitiser on the whole list would change what is stored, so the
+	 * warning is neutralised on that line, with the reason written next to it.
+	 */
+	foreach ( array( 'client' => 'sanitize_text_field(', 'role' => 'sanitize_text_field(', 'year' => 'intval(' ) as $ps_detail => $ps_cleaner ) {
+		$ps_statement = ps_statement_around(
+			$ps_fields_source,
+			'$_POST[ Portfolio_Studio_Meta::KEY_' . strtoupper( $ps_detail ) . ' ]'
+		);
+
+		PS_Test_Runner::ok(
+			false !== strpos( $ps_statement, $ps_cleaner ),
+			'the editor panel cleans the ' . $ps_detail . ' with a WordPress sanitiser the analyser can see'
+		);
+	}
+
+	PS_Test_Runner::ok(
+		(bool) preg_match( '/phpcs:ignore\s+WordPress\.Security\.ValidatedSanitizedInput\.InputNotSanitized/', $ps_fields_source ),
+		'the technologies carry the documented ignore: the list is cleaned label by label'
+	);
 
 	foreach ( array( 'sanitize_client', 'sanitize_role', 'sanitize_technologies' ) as $ps_sanitiser ) {
 		PS_Test_Runner::ok(
@@ -215,7 +256,7 @@ if ( 'secu-hostile' === $ps_phase ) {
 
 	// The proof is printed in the log: the reader sees the chain, not a claim.
 	ps_show_line( $ps_fields, '$client = isset( $_POST[', 'the write path reads the request' );
-	ps_show_line( $ps_fields, 'Portfolio_Studio_Meta::sanitize_client( sanitize_text_field( wp_unslash(', 'the write path calls the sanitiser' );
+	ps_show_line( $ps_fields, 'Portfolio_Studio_Meta::sanitize_client( wp_unslash(', 'the write path calls the sanitiser' );
 	ps_show_line( $ps_meta, 'return sanitize_text_field( (string) $value );', 'the sanitiser calls the WordPress sanitiser' );
 
 	// ---------------------------------------------------------------------
