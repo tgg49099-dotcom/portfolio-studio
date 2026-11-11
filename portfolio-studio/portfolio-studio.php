@@ -52,7 +52,7 @@ register_deactivation_hook( __FILE__, array( 'Portfolio_Studio_Lifecycle', 'deac
 // (listening to it would also make WordPress raise a deprecation notice on
 // every site creation). The new site is configured only when the plugin is
 // activated for the whole network — see `Portfolio_Studio_Lifecycle::activate_new_site()`.
-add_action( 'wp_initialize_site', array( 'Portfolio_Studio_Lifecycle', 'activate_new_site' ) );
+add_action( 'wp_initialize_site', array( 'Portfolio_Studio_Lifecycle', 'activate_new_site' ), 11 );
 
 /**
  * Boot the plugin.

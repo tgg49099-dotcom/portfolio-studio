@@ -253,7 +253,7 @@ class Portfolio_Studio_Meta {
 				continue;
 			}
 
-			$item = mb_substr( $item, 0, self::TECHNOLOGY_MAX_LENGTH );
+			$item = _mb_substr( $item, 0, self::TECHNOLOGY_MAX_LENGTH );
 
 			$key = function_exists( 'mb_strtolower' ) ? mb_strtolower( $item ) : strtolower( $item );
 			if ( isset( $seen[ $key ] ) ) {

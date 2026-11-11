@@ -98,6 +98,25 @@ class Portfolio_Studio_Lifecycle {
 			false
 		);
 
+		self::reset_rewrite_rules();
+	}
+
+	/**
+	 * Rebuild the rewrite rules of the current site.
+	 *
+	 * After `switch_to_blog()`, `flush_rewrite_rules()` would build the rules with the
+	 * permalink structure of the site we came from and store them in the switched site.
+	 * In that case the stored rules are deleted instead: WordPress rebuilds them, with
+	 * the right structure, on the next request to that site.
+	 *
+	 * @return void
+	 */
+	protected static function reset_rewrite_rules() {
+		if ( function_exists( 'ms_is_switched' ) && ms_is_switched() ) {
+			delete_option( 'rewrite_rules' );
+			return;
+		}
+
 		flush_rewrite_rules();
 	}
 
@@ -262,7 +281,7 @@ class Portfolio_Studio_Lifecycle {
 		delete_option( self::OPTION );
 
 		// The rewrite rules of the content type must not survive the deactivation.
-		flush_rewrite_rules();
+		self::reset_rewrite_rules();
 	}
 
 	/**
