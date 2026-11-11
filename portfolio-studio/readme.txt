@@ -12,7 +12,7 @@ Editorial portfolio for WordPress: a portfolio content type with client, year, r
 
 == Description ==
 
-Replacing Portfolio Post Type? Deactivate it, activate Portfolio Studio: your items, categories and tags stay.
+Replacing another portfolio plugin? Deactivate it, activate Portfolio Studio: your items, categories and tags stay.
 
 Portfolio Studio turns WordPress into an editorial portfolio: a `portfolio` content type,
 a category and a tag taxonomy, and four project details for every item — **client**,
@@ -23,8 +23,10 @@ for every item, and the data stays yours: it lives in your own database, in your
 
 == Works alongside the portfolio plugin you already have ==
 
-**Replace Portfolio Post Type: deactivate it, activate Portfolio Studio — your items,
+**Replace your current portfolio plugin: deactivate it, activate Portfolio Studio — your items,
 categories and tags stay.**
+
+Portfolio Studio is an independent implementation; it contains no code from Portfolio Post Type.
 
 Portfolio Studio does not create a second portfolio: it uses the `portfolio` content type
 that already exists on your site, so every item you published stays exactly where it is —
@@ -99,9 +101,9 @@ for a security issue.
 * Internal: the deprecated WordPress hook `wpmu_new_blog` is no longer used.
 
 = 0.1.1 =
-* Parity fixes: the category and tag URL slugs, the permalink prefix, the admin menu
-  position, the admin labels and the multisite activation now match the original
-  Portfolio Post Type plugin exactly.
+* Fixes: the category and tag URL slugs, the permalink prefix, the admin menu
+  position, the admin labels and the multisite activation now follow the same
+  conventions throughout the plugin.
 
 = 0.1.0 =
 * First release: portfolio content type, portfolio categories and tags, and the client,
