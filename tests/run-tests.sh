@@ -62,6 +62,11 @@ say "fixtures  : $FIXTURES"
 rm -rf "$PLUGDIR/portfolio-studio"
 cp -a "$REPO/portfolio-studio" "$PLUGDIR/portfolio-studio"
 
+# Pretty permalinks for the run: the lifecycle phases check the stored rewrite
+# rules, and with plain permalinks WordPress stores none. Restored at the end.
+PERMALINKS_BEFORE="$(wp_cmd option get permalink_structure 2>/dev/null)"
+wp_cmd rewrite structure '/%postname%/' > /dev/null 2>&1
+
 ACTIVE_BEFORE="$(wp_cmd plugin list --status=active --field=name 2>/dev/null | grep -v '^sqlite-database-integration$' | grep -v '^db.php$')"
 
 # --- 1. the J1 suite ----------------------------------------------------------
@@ -149,6 +154,7 @@ echo "$ACTIVE_BEFORE" | while read -r p; do
 	[ -z "$p" ] && continue
 	wp_cmd plugin activate "$p" > /dev/null 2>&1
 done
+wp_cmd rewrite structure "$PERMALINKS_BEFORE" > /dev/null 2>&1
 
 # --- 4. summary ---------------------------------------------------------------
 say ""

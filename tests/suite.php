@@ -31,6 +31,29 @@ printf( "# Portfolio Studio - J1 suite (phase: %s)\n", $ps_phase );
 printf( "# WordPress %s / PHP %s\n", get_bloginfo( 'version' ), PHP_VERSION );
 
 /**
+ * The rewrite rules stored in the database that mention the portfolio.
+ *
+ * Read straight from the option: an assertion about the stored rules is an
+ * assertion about what a visitor's request will be routed with.
+ *
+ * @return array<int,string>
+ */
+function ps_stored_portfolio_rules() {
+	$rules = get_option( 'rewrite_rules' );
+	if ( ! is_array( $rules ) ) {
+		return array();
+	}
+	return array_values(
+		array_filter(
+			array_keys( $rules ),
+			static function ( $regex ) {
+				return false !== strpos( (string) $regex, 'portfolio' );
+			}
+		)
+	);
+}
+
+/**
  * Read the registration log collected by the test mu-plugin.
  *
  * @return array
@@ -273,6 +296,16 @@ if ( 'activated' === $ps_phase ) {
 		'the plugin is active'
 	);
 
+	// Witness of the deactivation check below: with pretty permalinks (the runner
+	// sets them), the activation wrote the rules of the content type. Without this
+	// witness, an empty rule set would make the deactivation check pass for nothing.
+	if ( '' !== (string) get_option( 'permalink_structure' ) ) {
+		PS_Test_Runner::ok(
+			count( ps_stored_portfolio_rules() ) > 0,
+			'the activation stored the rewrite rules of the portfolio'
+		);
+	}
+
 	$ps_option = get_option( 'portfolio_studio_state' );
 	PS_Test_Runner::ok( is_array( $ps_option ), 'the plugin state option exists' );
 	PS_Test_Runner::same(
@@ -362,6 +395,15 @@ if ( 'deactivated' === $ps_phase ) {
 	PS_Test_Runner::ok(
 		false === get_option( 'portfolio_studio_state' ),
 		'the plugin state option was removed'
+	);
+
+	// The deactivation runs while the content type is still registered: the rules
+	// must be rebuilt WITHOUT it, or /portfolio/ keeps being routed to a content type
+	// that no longer exists.
+	PS_Test_Runner::same(
+		array(),
+		ps_stored_portfolio_rules(),
+		'no rewrite rule of the portfolio survives the deactivation'
 	);
 
 	PS_Test_Runner::ok(

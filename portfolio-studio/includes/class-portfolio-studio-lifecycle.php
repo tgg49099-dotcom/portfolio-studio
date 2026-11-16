@@ -281,7 +281,49 @@ class Portfolio_Studio_Lifecycle {
 		delete_option( self::OPTION );
 
 		// The rewrite rules of the content type must not survive the deactivation.
+		// The deactivation runs in a request where the plugin is still loaded, so our
+		// content type and taxonomies are still registered: rebuilding the rules now
+		// would write them back. They are unregistered first, as the Plugin Handbook
+		// does in its deactivation example — after the default category was removed,
+		// because WordPress cannot delete a term of a taxonomy that is not registered.
+		if ( ! ( function_exists( 'ms_is_switched' ) && ms_is_switched() ) ) {
+			self::unregister_owned();
+		}
+
 		self::reset_rewrite_rules();
+	}
+
+	/**
+	 * Unregister, for the rest of the current request, what this plugin registered.
+	 *
+	 * Only the names this plugin registered itself are unregistered: a content type or
+	 * a taxonomy of another plugin is never touched, so its rewrite rules are rebuilt
+	 * with it. Not used after `switch_to_blog()`: there the stored rules are deleted
+	 * and WordPress rebuilds them on the next request, when the plugin is gone, and the
+	 * registrations must stay for the next sites of the loop.
+	 *
+	 * @return array<int,string> The names that were unregistered.
+	 */
+	public static function unregister_owned() {
+		$removed = array();
+
+		foreach ( array_keys( Portfolio_Studio_Content_Types::owned() ) as $name ) {
+			if ( Portfolio_Studio_Content_Types::POST_TYPE === $name ) {
+				continue;
+			}
+
+			if ( taxonomy_exists( $name ) && true === unregister_taxonomy( $name ) ) {
+				$removed[] = $name;
+			}
+		}
+
+		if ( Portfolio_Studio_Content_Types::owns( Portfolio_Studio_Content_Types::POST_TYPE )
+			&& post_type_exists( Portfolio_Studio_Content_Types::POST_TYPE )
+			&& true === unregister_post_type( Portfolio_Studio_Content_Types::POST_TYPE ) ) {
+			$removed[] = Portfolio_Studio_Content_Types::POST_TYPE;
+		}
+
+		return $removed;
 	}
 
 	/**
