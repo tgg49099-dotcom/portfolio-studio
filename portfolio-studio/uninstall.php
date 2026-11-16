@@ -20,8 +20,13 @@ require_once __DIR__ . '/includes/class-portfolio-studio-lifecycle.php';
 // content type and the taxonomies are not registered in this request. The cleanup below
 // therefore works on the stored data, not on the runtime objects.
 
+if ( ! function_exists( 'portfolio_studio_uninstall_current_site' ) ) :
 /**
  * Remove what the plugin owns on the CURRENT site.
+ *
+ * Declared only once: WordPress runs this file once per uninstall, but a second run
+ * in the same PHP process (WP-CLI, a test that runs the routine twice) must not stop
+ * on a fatal "cannot redeclare" error halfway through the cleanup.
  *
  * @return void
  */
@@ -70,6 +75,7 @@ function portfolio_studio_uninstall_current_site() {
 		}
 	}
 }
+endif;
 
 // The plugin can be activated for the whole network: the network activation writes its
 // option and its default category in EVERY site of the network. The uninstall must
